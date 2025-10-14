@@ -1,6 +1,13 @@
-﻿namespace ImageBlurificatorApi.Services.Implementations
+﻿using ImageBlurificatorApi.Models;
+using ImageBlurificatorApi.Services.Interfaces;
+
+namespace ImageBlurificatorApi.Services.Implementations
 {
-    public class OpenCvImageProcessor
+    public class OpenCvImageProcessor : IImageProcessor
     {
+        public Task<byte[]> ProcessAsync(string imageBase64, EncodingType encoding, CancellationToken token)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

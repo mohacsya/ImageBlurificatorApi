@@ -1,6 +1,6 @@
 ﻿namespace ImageBlurificatorApi.Models
 {
-    enum EncodingType
+    public enum EncodingType
     {
         PNG,
         JPG
