@@ -3,8 +3,12 @@ using ImageBlurificatorApi.Services.Interfaces;
 
 namespace ImageBlurificatorApi.Services.Implementations
 {
+    /// <summary>
+    /// A dummy implementation of IImageProcessor that simply decodes the base64 image string and returns it as a byte array.
+    /// </summary>
     public class DummyImageProcessor : IImageProcessor
     {
+
         public Task<byte[]> ProcessAsync(string imageBase64, EncodingType encoding, CancellationToken token)
         {
             if (string.IsNullOrWhiteSpace(imageBase64))
