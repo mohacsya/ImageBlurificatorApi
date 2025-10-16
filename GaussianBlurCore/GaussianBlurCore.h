@@ -1,10 +1,11 @@
 #pragma once
-
 using namespace System;
 
-namespace GaussianBlurCore {
-	public ref class Class1
-	{
-		// TODO: Add your methods for this class here.
-	};
+namespace GaussianBlurCore
+{
+    public ref class GaussianBlurCoreProcessor
+    {
+    public:
+        array<Byte>^ ApplyGaussianBlur(array<Byte>^ input, int width, int height, int channels);
+    };
 }
