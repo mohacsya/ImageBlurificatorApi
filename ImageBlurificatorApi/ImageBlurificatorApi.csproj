@@ -18,10 +18,6 @@
     <ProjectReference Include="..\GaussianBlurCore\GaussianBlurCore.vcxproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Utilities\" />
-  </ItemGroup>
-
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="copy /Y &quot;$(SolutionDir)x64\$(Configuration)\GaussianBlurNative.dll&quot; &quot;$(OutDir)&quot;" />
   </Target>
