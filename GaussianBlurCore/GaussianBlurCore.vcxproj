@@ -24,7 +24,6 @@
     <ProjectGuid>{6660BB6E-0006-641A-8160-03CDD09BCA5E}</ProjectGuid>
     <Keyword>NetCoreCProj</Keyword>
     <RootNamespace>GaussianBlurCore</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <TargetFramework>net8.0</TargetFramework>
     <WindowsTargetPlatformMinVersion>10.0.22621.0</WindowsTargetPlatformMinVersion>
   </PropertyGroup>
