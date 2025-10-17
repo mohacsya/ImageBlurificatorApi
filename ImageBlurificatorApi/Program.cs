@@ -25,7 +25,7 @@ builder.Services.AddSwaggerGen(
 );
 
 // Registering image processor service 
-builder.Services.AddScoped<IImageProcessor, DummyImageProcessor>();
+builder.Services.AddScoped<IImageProcessor, OpenCvImageProcessor>();
 
 var app = builder.Build();
 

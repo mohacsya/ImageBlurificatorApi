@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using System.Buffers.Text;
+using System.Drawing;
+using ImageBlurificatorApi.Models;
 
 namespace ImageBlurificatorApi.Utilities
 {
@@ -6,11 +8,13 @@ namespace ImageBlurificatorApi.Utilities
     {
         public static Bitmap ConvertBase64ToBitmap(string base64String)
         {
-            byte[] imageBytes = Convert.FromBase64String(base64String);
-            using (var ms = new MemoryStream(imageBytes))
-            {
-                return new Bitmap(ms);
-            }
+            int commaIndex = base64String.IndexOf(',');
+            if (commaIndex >= 0)
+                base64String = base64String[(commaIndex + 1)..];
+
+            byte[] bytes = Convert.FromBase64String(base64String);
+            using var ms = new MemoryStream(bytes);
+            return new Bitmap(ms);
         }
         public static byte[] GetRawImageBytes(Bitmap bitmap)
         {
@@ -19,7 +23,7 @@ namespace ImageBlurificatorApi.Utilities
             byte[] imageBytes;
             try
             {
-                int bytes = Math.Abs(bmpData.Stride) * bitmap.Height;
+                int bytes = bitmap.Width * bitmap.Height * 3;
                 imageBytes = new byte[bytes];
                 System.Runtime.InteropServices.Marshal.Copy(bmpData.Scan0, imageBytes, 0, bytes);
             }
@@ -44,6 +48,16 @@ namespace ImageBlurificatorApi.Utilities
                 bitmap.UnlockBits(imageData);
             }
             return bitmap;
+        }
+
+        public static byte[] ConvertBitmapToBytes(Bitmap bitmap, EncodingType encodingType)
+        {
+            var outputEncoding = encodingType == EncodingType.PNG ? System.Drawing.Imaging.ImageFormat.Png : System.Drawing.Imaging.ImageFormat.Jpeg;
+            using (var ms = new MemoryStream())
+            {
+                bitmap.Save(ms, outputEncoding);
+                return ms.ToArray();
+            }
         }
     }
 }

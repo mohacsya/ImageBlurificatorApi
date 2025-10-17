@@ -54,5 +54,5 @@ resultbmp.Save("blurred.jpg");
 
 
     
-    File.WriteAllBytes("blurredorig.png", inputBytes);
-    Console.WriteLine("Feldolgozás kész! Létrejött: blurred.png");
+File.WriteAllBytes("blurredorig.png", inputBytes);
+Console.WriteLine("Feldolgozás kész! Létrejött: blurred.png");
