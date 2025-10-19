@@ -17,7 +17,7 @@ namespace ImageBlurificatorApi.Services.Implementations
             token.ThrowIfCancellationRequested();
 
             // Decode the Bitmap string to a byte array
-            byte[] imageBytes = ImageHelper.ConvertBitmapToRgbBytes(imageBmp, encodingInfo);
+            byte[] imageBytes = ImageHelper.ExtractPackedBuffer(imageBmp, encodingInfo.PixelFormat, out int width, out int height, out int channels);
 
             // Return as a completed Task
             return Task.FromResult(imageBytes);

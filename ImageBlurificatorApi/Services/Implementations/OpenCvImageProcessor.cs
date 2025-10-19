@@ -9,41 +9,30 @@ namespace ImageBlurificatorApi.Services.Implementations
     /// <summary>
     /// Provides image processing functionality using OpenCV-based Gaussian blur.
     /// </summary>
-    public class OpenCvImageProcessor : IImageProcessor
+    public sealed class OpenCvImageProcessor : IImageProcessor
     {
-        /// <summary>
-        /// Applies a Gaussian blur to the provided bitmap using native OpenCV interop, and returns the processed image as a byte array in the specified encoding.
-        /// </summary>
-        /// <param name="inputBmp">The input image as a Bitmap</param>
-        /// <param name="encodingInfo">Encoding information for the output image.</param>
-        /// <param name="token">Cancellation token for cooperative cancellation.</param>
-        /// <returns>A task containing the processed image as a byte array in the requested encoding.</returns>
+        private readonly GaussianBlurCoreProcessor _native = new();
+
         public Task<byte[]> ProcessAsync(Bitmap inputBmp, ImageEncodingInfo encodingInfo, CancellationToken token)
         {
-            // Check for cancellation before starting processing
             token.ThrowIfCancellationRequested();
 
-            int width = inputBmp.Width;
-            int height = inputBmp.Height;
-            int channels = encodingInfo.Channels;
+            // Normalize & extract packed buffer in output format
+            byte[] packedInput = ImageHelper.ExtractPackedBuffer(inputBmp, encodingInfo.PixelFormat,
+                                                                 out int width, out int height, out int channels);
 
-            // Bitmap -> Raw RGB byte array
-            byte[] inputBytes = ImageHelper.ConvertBitmapToRgbBytes(inputBmp, encodingInfo);
-            token.ThrowIfCancellationRequested();
+            int expected = width * height * channels;
+            if (packedInput.Length != expected)
+                throw new InvalidOperationException("Packed input length mismatch.");
 
-            // Apply Gaussian blur using the native processor (interop with C++/OpenCV)
-            byte[] resultBytes = new GaussianBlurCoreProcessor().ApplyGaussianBlur(inputBytes, width, height, channels);
-            token.ThrowIfCancellationRequested();
+            byte[] packedBlurred = _native.ApplyGaussianBlur(packedInput, width, height, channels);
 
-            // RGB byte array -> Bitmap -> Encoded byte array
-            byte[] finalBytes;
-            using (Bitmap outputBmp = ImageHelper.ConvertRgbBytesToBitmap(resultBytes, width, height, encodingInfo))
-            {
-                finalBytes = ImageHelper.ConvertBitmapToBytes(outputBmp, encodingInfo);
-            }
-            token.ThrowIfCancellationRequested();
+            if (packedBlurred.Length != expected)
+                throw new InvalidOperationException("Native output length mismatch.");
 
-            return Task.FromResult(finalBytes);
+            byte[] encoded = ImageHelper.EncodePackedBuffer(packedBlurred, width, height, encodingInfo);
+
+            return Task.FromResult(encoded);
         }
     }
 }
