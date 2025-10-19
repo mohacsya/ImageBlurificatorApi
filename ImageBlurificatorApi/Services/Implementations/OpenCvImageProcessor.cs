@@ -23,8 +23,6 @@ namespace ImageBlurificatorApi.Services.Implementations
 
             var pixelFormat = encodingInfo.PixelFormat;
             int expectedChannels = encodingInfo.Channels;
-            var native = _native;
-
 
             return Task.Run(() =>
             {
