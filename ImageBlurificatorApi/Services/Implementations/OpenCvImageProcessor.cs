@@ -41,7 +41,7 @@ namespace ImageBlurificatorApi.Services.Implementations
                 if (packedInput.Length != expected)
                     throw new InvalidOperationException("Packed input length mismatch.");
 
-                // Execute native Gaussian blur
+                // Execute native Gaussian blur synchronously
                 byte[] packedBlurred = _native.ApplyGaussianBlur(packedInput, width, height, channels);
 
                 if (packedBlurred.Length != expected)
