@@ -3,11 +3,13 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Xml.Linq;
+using ImageBlurificatorApi.Exceptions;
 using ImageBlurificatorApi.Models.Internal;
 using ImageBlurificatorApi.Models.Requests;
 using ImageBlurificatorApi.Services.Interfaces;
 using ImageBlurificatorApi.Utilities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace ImageBlurificatorApi.Controllers
 {
@@ -17,10 +19,14 @@ namespace ImageBlurificatorApi.Controllers
     public class ImageProcessorController : Controller
     {
         private readonly IImageProcessor _processor;
+        private readonly IImageInputValidator _validator;
+        private readonly ImageProcessingValidationOptions _limits;
 
-        public ImageProcessorController(IImageProcessor processor)
+        public ImageProcessorController(IImageProcessor processor, IImageInputValidator imageInputValidator, IOptions<ImageProcessingValidationOptions> options)
         {
             _processor = processor;
+            _validator = imageInputValidator;
+            _limits = options.Value;
         }
 
         /// <summary>
@@ -38,21 +44,42 @@ namespace ImageBlurificatorApi.Controllers
 
             try
             {
+                _validator.ValidateRequestedEncoding(request.OutputEncoding.ToString(), _limits.AllowedEncodings);
+                _validator.ValidateBase64Envelope(request.Image, _limits.MaxDecodedBytes);
                 ImageEncodingInfo encodingInfo = ImageHelper.GetEncodingInfo(request.OutputEncoding);
 
                 // Convert base64 string to Bitmap and ensure disposal
                 byte[] processedImageBytes;
                 using (Bitmap imageBmp = ImageHelper.ConvertBase64ToBitmap(request.Image))
                 {
+                    using (var ms = new MemoryStream())
+                    {
+                        imageBmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                        _validator.ValidateDecodedLength(ms.Length, _limits.MaxDecodedBytes);
+                    }
+                    _validator.ValidateDimensions(imageBmp.Width, imageBmp.Height, _limits.MaxPixels);
+
                     processedImageBytes = await _processor.ProcessAsync(imageBmp, encodingInfo, token);
                 }
 
                 return File(processedImageBytes, encodingInfo.MimeType, enableRangeProcessing: false);
             }
-            catch (Exception ex)
+            catch (ImageSizeLimitExceededException ex)
+            {
+                return StatusCode(StatusCodes.Status413PayloadTooLarge, new { error = ex.Message });
+            }
+            catch (UnsupportedImageFormatException ex)
+            {
+                return StatusCode(StatusCodes.Status415UnsupportedMediaType, new { error = ex.Message });
+            }
+            catch (ImageValidationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception)
             {
                 // Log exception (not shown here)
-                return Problem(title: "An unexpected error occurred while processing the image.", statusCode: 500, detail: ex.Message);
+                return Problem(title: "An unexpected error occurred while processing the image.", statusCode: 500);
             }
         }
 
@@ -71,6 +98,9 @@ namespace ImageBlurificatorApi.Controllers
 
             try
             {
+                _validator.ValidateRequestedEncoding(request.OutputEncoding.ToString(), _limits.AllowedEncodings);
+                _validator.ValidateFileEnvelope(request.Image, _limits.MaxFileBytes, _limits.AllowedContentTypes);
+
                 ImageEncodingInfo encodingInfo = ImageHelper.GetEncodingInfo(request.OutputEncoding);
 
                 byte[] processedImageBytes;
@@ -78,15 +108,27 @@ namespace ImageBlurificatorApi.Controllers
                 using (var stream = request.Image.OpenReadStream())
                 using (var imageBmp = new Bitmap(stream))
                 {
+                    _validator.ValidateDimensions(imageBmp.Width, imageBmp.Height, _limits.MaxPixels);
                     processedImageBytes = await _processor.ProcessAsync(imageBmp, encodingInfo, token);
                 }
 
                 return File(processedImageBytes, encodingInfo.MimeType);
             }
-            catch (Exception ex)
+            catch (ImageSizeLimitExceededException ex)
             {
-                // Log exception (not shown here)
-                return Problem(title: "An unexpected error occurred while processing the image.", statusCode: 500, detail: ex.Message);
+                return StatusCode(StatusCodes.Status413PayloadTooLarge, new { error = ex.Message });
+            }
+            catch (UnsupportedImageFormatException ex)
+            {
+                return StatusCode(StatusCodes.Status415UnsupportedMediaType, new { error = ex.Message });
+            }
+            catch (ImageValidationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception)
+            {
+                return Problem(title: "An unexpected error occurred while processing the image.", statusCode: 500);
             }
         }
     }

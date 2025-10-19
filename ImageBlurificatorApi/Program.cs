@@ -1,11 +1,13 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
+using ImageBlurificatorApi.Models.Internal;
 using ImageBlurificatorApi.Services.Implementations;
 using ImageBlurificatorApi.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.Configure<ImageProcessingValidationOptions>(
+    builder.Configuration.GetSection("ImageProcessingValidation"));
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -24,8 +26,9 @@ builder.Services.AddSwaggerGen(
 }
 );
 
-// Registering image processor service 
+// Registering image processor and validator service 
 builder.Services.AddScoped<IImageProcessor, OpenCvImageProcessor>();
+builder.Services.AddSingleton<IImageInputValidator, ImageInputValidator>();
 
 var app = builder.Build();
 
