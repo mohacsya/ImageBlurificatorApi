@@ -6,7 +6,7 @@ using ImageBlurificatorApi.Utilities;
 namespace ImageBlurificatorApi.Services.Implementations
 {
     /// <summary>
-    /// A dummy implementation of IImageProcessor that simply decodes the base64 image string and returns it as a byte array.
+    /// A dummy implementation of IImageProcessor that simply  returns the original image as a byte array.
     /// </summary>
     public class DummyImageProcessor : IImageProcessor
     {
@@ -16,7 +16,7 @@ namespace ImageBlurificatorApi.Services.Implementations
             // Optionally check for cancellation
             token.ThrowIfCancellationRequested();
 
-            // Decode the base64 string to a byte array
+            // Decode the Bitmap string to a byte array
             byte[] imageBytes = ImageHelper.ConvertBitmapToRgbBytes(imageBmp, encodingInfo);
 
             // Return as a completed Task
