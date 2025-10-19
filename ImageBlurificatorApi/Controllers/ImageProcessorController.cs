@@ -48,11 +48,6 @@ namespace ImageBlurificatorApi.Controllers
                 byte[] processedImageBytes;
                 using (Bitmap imageBmp = ImageHelper.ConvertBase64ToBitmap(request.Image))
                 {
-                    using (var ms = new MemoryStream())
-                    {
-                        imageBmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                        _validator.ValidateDecodedLength(ms.Length, _limits.MaxDecodedBytes);
-                    }
                     _validator.ValidateDimensions(imageBmp.Width, imageBmp.Height, _limits.MaxPixels);
 
                     processedImageBytes = await _processor.ProcessAsync(imageBmp, encodingInfo, token);
