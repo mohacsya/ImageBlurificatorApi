@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "cpptester": {
-      "commandName": "Project",
-      "nativeDebugging": true
-    }
-  }
-}
