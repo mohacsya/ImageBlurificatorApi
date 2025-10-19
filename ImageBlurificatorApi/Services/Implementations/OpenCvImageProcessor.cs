@@ -21,22 +21,38 @@ namespace ImageBlurificatorApi.Services.Implementations
         {
             token.ThrowIfCancellationRequested();
 
-            // Normalize & extract packed buffer in output format
-            byte[] packedInput = ImageHelper.ExtractPackedBuffer(inputBmp, encodingInfo.PixelFormat,
-                                                                 out int width, out int height, out int channels);
+            var pixelFormat = encodingInfo.PixelFormat;
+            int expectedChannels = encodingInfo.Channels;
+            var native = _native;
 
-            int expected = width * height * channels;
-            if (packedInput.Length != expected)
-                throw new InvalidOperationException("Packed input length mismatch.");
 
-            byte[] packedBlurred = _native.ApplyGaussianBlur(packedInput, width, height, channels);
+            return Task.Run(() =>
+            {
+                token.ThrowIfCancellationRequested();
 
-            if (packedBlurred.Length != expected)
-                throw new InvalidOperationException("Native output length mismatch.");
+                // Normalize & extract packed buffer in output format
+                byte[] packedInput = ImageHelper.ExtractPackedBuffer(inputBmp, encodingInfo.PixelFormat,
+                                                                     out int width, out int height, out int channels);
 
-            byte[] encoded = ImageHelper.EncodePackedBuffer(packedBlurred, width, height, encodingInfo);
+                if (channels != expectedChannels)
+                    throw new InvalidOperationException($"Channel mismatch: expected {expectedChannels}, got {channels}.");
 
-            return Task.FromResult(encoded);
+                int expected = width * height * channels;
+                if (packedInput.Length != expected)
+                    throw new InvalidOperationException("Packed input length mismatch.");
+
+                // Execute native Gaussian blur
+                byte[] packedBlurred = _native.ApplyGaussianBlur(packedInput, width, height, channels);
+
+                if (packedBlurred.Length != expected)
+                    throw new InvalidOperationException("Native output length mismatch.");
+
+                token.ThrowIfCancellationRequested();
+                byte[] encoded = ImageHelper.EncodePackedBuffer(packedBlurred, width, height, encodingInfo);
+
+                return encoded;
+            });
+           
         }
     }
 }
