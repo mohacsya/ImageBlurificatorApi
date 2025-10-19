@@ -1,6 +1,5 @@
 ﻿using ImageBlurificatorApi.Exceptions;
 using ImageBlurificatorApi.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
 using System.Text.RegularExpressions;
 
 namespace ImageBlurificatorApi.Services.Implementations

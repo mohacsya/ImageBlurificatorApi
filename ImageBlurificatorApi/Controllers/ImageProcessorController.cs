@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Drawing;
-using System.IO;
-using System.Text;
-using System.Xml.Linq;
+﻿using System.Drawing;
 using ImageBlurificatorApi.Exceptions;
 using ImageBlurificatorApi.Models.Internal;
 using ImageBlurificatorApi.Models.Requests;

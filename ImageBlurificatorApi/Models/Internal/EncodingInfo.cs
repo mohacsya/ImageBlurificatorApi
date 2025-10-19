@@ -1,5 +1,4 @@
 ﻿using System.Drawing.Imaging;
-using System.Runtime.Serialization;
 
 namespace ImageBlurificatorApi.Models.Internal
 {
