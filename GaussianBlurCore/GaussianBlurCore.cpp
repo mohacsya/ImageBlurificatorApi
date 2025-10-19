@@ -15,12 +15,18 @@ array<Byte>^ GaussianBlurCoreProcessor::ApplyGaussianBlur(array<Byte>^ input, in
 
     pin_ptr<Byte> pInput = &input[0];
     pin_ptr<Byte> pOutput = &output[0];
-    unsigned char* inputData = new unsigned char[length](); // Dynamically allocate memory for input buffer
-    for (size_t i = 0; i < length; i++)
-    {
-        inputData[i] = input[i];
-    }
-    ApplyGaussianBlurNative(inputData, length, pOutput, width, height, channels);
-	delete[] inputData; // Free the dynamically allocated memory
+    //unsigned char* inputData = new unsigned char[length](); // Dynamically allocate memory for input buffer
+    //for (size_t i = 0; i < length; i++)
+    //{
+    //    inputData[i] = input[i];
+    //}
+    //ApplyGaussianBlurNative(inputData, length, pOutput, width, height, channels);
+    ApplyGaussianBlurNative(
+        reinterpret_cast<const unsigned char*>(pInput),
+        length,
+        reinterpret_cast<unsigned char*>(pOutput),
+        width, height, channels
+    );
+	//delete[] inputData; // Free the dynamically allocated memory
     return output;
 }

@@ -1,35 +1,32 @@
-﻿using ImageBlurificatorApi.Models;
-using ImageBlurificatorApi.Services.Interfaces;
+﻿using ImageBlurificatorApi.Services.Interfaces;
 using GaussianBlurCore;
 using ImageBlurificatorApi.Utilities;
 using System.Drawing;
+using ImageBlurificatorApi.Models.Internal;
 
 namespace ImageBlurificatorApi.Services.Implementations
 {
+    /// <summary>
+    /// Implements image processing using OpenCV for Gaussian blur.
+    /// </summary>
     public class OpenCvImageProcessor : IImageProcessor
     {
-
-        public Task<byte[]> ProcessAsync(string imageBase64, EncodingType encoding, CancellationToken token)
+        public Task<byte[]> ProcessAsync(Bitmap inputBmp, ImageEncodingInfo encodingInfo, CancellationToken token)
         {
-            Console.WriteLine(File.Exists("GaussianBlurCore.dll"));
-            int width;
-            int height;
-            int channels = 3; 
-            byte[] inputBytes;
-            using (Bitmap inputBmp = ImageHelper.ConvertBase64ToBitmap(imageBase64))
-            {
-                inputBytes = ImageHelper.GetRawImageBytes(inputBmp);
-                width = inputBmp.Width; 
-                height = inputBmp.Height;
-            }
-            var processor = new GaussianBlurCoreProcessor();           
-            byte[] resultBytes = processor.ApplyGaussianBlur(inputBytes, width, height, channels);
+            int width = inputBmp.Width; ;
+            int height = inputBmp.Height; ;
+            int channels = encodingInfo.Channels;
+            
+            byte[] inputBytes = ImageHelper.ConvertBitmapToRgbBytes(inputBmp, encodingInfo);
+
+            byte[] resultBytes = new GaussianBlurCoreProcessor().ApplyGaussianBlur(inputBytes, width, height, channels);
+
             byte[] finalBytes;
-            using (Bitmap outputBmp = ImageHelper.ConvertRawBytesToBitmap(resultBytes, width, height))
+            using (Bitmap outputBmp = ImageHelper.ConvertRawBytesToBitmap(resultBytes, width, height, encodingInfo))
             {
-                finalBytes = ImageHelper.ConvertBitmapToBytes(outputBmp, encoding);
-                outputBmp.Save("blurred_output.png", System.Drawing.Imaging.ImageFormat.Png);
+                finalBytes = ImageHelper.ConvertBitmapToBytes(outputBmp, encodingInfo);
             }
+            
             return Task.FromResult(finalBytes);
         }
 

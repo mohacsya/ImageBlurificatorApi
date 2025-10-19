@@ -33,7 +33,13 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+        {
+            c.ConfigObject.AdditionalItems["defaultModelRendering"] = "schema";
+            c.ConfigObject.AdditionalItems["tryItOutEnabled"] = true;
+            c.ConfigObject.AdditionalItems["showCommonExtensions"] = true;
+        }
+     );
 }
 
 app.UseHttpsRedirection();

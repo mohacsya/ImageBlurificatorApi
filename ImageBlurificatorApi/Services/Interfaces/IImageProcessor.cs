@@ -1,4 +1,5 @@
-﻿using ImageBlurificatorApi.Models;
+﻿using System.Drawing;
+using ImageBlurificatorApi.Models.Internal;
 
 namespace ImageBlurificatorApi.Services.Interfaces
 {
@@ -8,12 +9,12 @@ namespace ImageBlurificatorApi.Services.Interfaces
     public interface IImageProcessor
     {
         /// <summary>
-        /// Processes the given base64-encoded image string and returns the processed image as a byte array in the specified encoding format.
+        /// Processes the provided Bitmap and returns the processed image as a byte array in the specified encoding format.
         /// </summary>
-        /// <param name="imageBase64">  The image data converted to base64 raw string.</param>
-        /// <param name="encoding">     The output encoding.</param>
+        /// <param name="imageBmp">  The image data converted to base64 raw string.</param>
+        /// <param name="encodingInfo">     The encoding info associated with the request.</param>
         /// <param name="token">        Cancellation token for the image processing.</param>
         /// <returns></returns>
-        Task<byte[]> ProcessAsync(string imageBase64, EncodingType encoding, CancellationToken token);
+        Task<byte[]> ProcessAsync(Bitmap imageBmp, ImageEncodingInfo encodingInfo, CancellationToken token);
     }
 }
