@@ -11,8 +11,12 @@ namespace ImageBlurificatorApi.Services.Implementations
     /// </summary>
     public sealed class OpenCvImageProcessor : IImageProcessor
     {
-        private readonly GaussianBlurCoreProcessor _native = new();
+        private readonly GaussianBlurCoreProcessor _native;
 
+        public OpenCvImageProcessor(GaussianBlurCoreProcessor nativeProcessor)
+        {
+            _native = nativeProcessor;
+        }
         public Task<byte[]> ProcessAsync(Bitmap inputBmp, ImageEncodingInfo encodingInfo, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();

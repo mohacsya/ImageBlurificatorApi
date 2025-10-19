@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
+using GaussianBlurCore;
 using ImageBlurificatorApi.Models.Internal;
 using ImageBlurificatorApi.Services.Implementations;
 using ImageBlurificatorApi.Services.Interfaces;
@@ -29,6 +30,7 @@ builder.Services.AddSwaggerGen(
 // Registering image processor and validator service 
 builder.Services.AddScoped<IImageProcessor, OpenCvImageProcessor>();
 builder.Services.AddSingleton<IImageInputValidator, ImageInputValidator>();
+builder.Services.AddSingleton<GaussianBlurCoreProcessor>();
 
 var app = builder.Build();
 
